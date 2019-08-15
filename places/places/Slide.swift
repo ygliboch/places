@@ -13,4 +13,5 @@ class Slide: UIView {
 
     @IBOutlet weak var address: UILabel!
     @IBOutlet weak var label: UILabel!
+    
 }

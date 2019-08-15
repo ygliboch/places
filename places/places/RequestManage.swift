@@ -15,13 +15,17 @@ class RequestManager {
         Alamofire.request("https://api.foursquare.com/v2/venues/search?near=Kiev&client_id=XVXMQC02THLDGUFQWYFAM3MENUB4XGLJKUNAOHYKRCPFPHPI&client_secret=XQ2LSGSQZQXJTIE1N5L5B35VIAID4VSDYHPT03RBBOQA51MI&v=20190302").responseJSON { (response) in
             if response.data != nil && response.error == nil {
                 let json = JSON(response.value!)
-//                print(json)
                 completationHandler(json)
             }
         }
     }
     
-    func getImage() {
-        
+    func venueInfo(id: String, completationHandler: @escaping(JSON?)->Void) {
+        Alamofire.request("https://api.foursquare.com/v2/venues/\(id)&client_id=XVXMQC02THLDGUFQWYFAM3MENUB4XGLJKUNAOHYKRCPFPHPI&client_secret=XQ2LSGSQZQXJTIE1N5L5B35VIAID4VSDYHPT03RBBOQA51MI&v=20190302").responseJSON { (response) in
+            if response.data != nil && response.error == nil {
+                let json = JSON(response.value!)
+                completationHandler(json)
+            }
+        }
     }
 }

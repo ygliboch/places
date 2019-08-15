@@ -30,6 +30,7 @@
                 </label>
             </subviews>
             <color key="backgroundColor" red="1" green="0.16572630560000001" blue="0.16004215290000001" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+            <gestureRecognizers/>
             <constraints>
                 <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="vw1-n3-Aut" secondAttribute="trailing" constant="15" id="K5x-K5-9Iw"/>
                 <constraint firstItem="dpw-4x-bfv" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" constant="15" id="VuP-oa-7dz"/>

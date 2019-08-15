@@ -21,6 +21,8 @@ class ViewController: UIViewController {
     let requestManager = RequestManager()
     var venues: [JSON] = []
     var points: [MKPointAnnotation] = []
+    var newView: Slide?
+    var slide: Slide?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,8 +41,13 @@ class ViewController: UIViewController {
         for venue in venues {
             let slide:Slide = Bundle.main.loadNibNamed("Slide", owner: self, options: nil)?.first as! Slide
             slide.label.text = venue["name"].string
-//            let address = venue["location"]["formattedAddress"]
             slide.address.text = "\(venue["location"]["formattedAddress"][0]), \(venue["location"]["formattedAddress"][1]), \(venue["location"]["formattedAddress"][2])"
+            let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handle))
+            slide.isUserInteractionEnabled = true
+            slide.gestureRecognizers = [panGesture]
+            requestManager.venueInfo(id: venue["id"].string!) { (response) in
+                print(response)
+            }
             slides.append(slide)
         }
     }
@@ -51,9 +58,54 @@ class ViewController: UIViewController {
         scrollView.isPagingEnabled = true
         
         for i in 0 ..< slides.count {
-            slides[i].frame = CGRect(x: view.frame.width * CGFloat(i) + 8, y: 0, width: view.frame.width - 16, height: view.frame.height)
+            slides[i].frame = CGRect(x: view.frame.width * CGFloat(i) + 12, y: 0, width: view.frame.width - 24, height: view.frame.height)
             scrollView.addSubview(slides[i])
         }
+    }
+    
+    @objc func handle(gestureRecognizer: UIPanGestureRecognizer) {
+        print(gestureRecognizer.velocity(in: gestureRecognizer.view).x, gestureRecognizer.velocity(in: gestureRecognizer.view).x)
+        if gestureRecognizer.velocity(in: gestureRecognizer.view).x < -1500.0 && gestureRecognizer.velocity(in: gestureRecognizer.view).x < -1500.0 && scrollView.contentOffset.x + self.view.frame.width <= scrollView.contentSize.width{
+            scrollView.setContentOffset(CGPoint(x: scrollView.contentOffset.x + self.view.frame.width, y: 0), animated: true)
+            if newView != nil {
+                self.newView?.removeFromSuperview()
+                self.newView = nil
+                self.slide!.isHidden = false
+            }
+            return
+        } else if gestureRecognizer.velocity(in: gestureRecognizer.view).x > 1500.0 && gestureRecognizer.velocity(in: gestureRecognizer.view).x > 1500.0  && scrollView.contentOffset.x - self.view.frame.width >= 0{
+            if newView != nil {
+                self.newView?.removeFromSuperview()
+                self.newView = nil
+                self.slide!.isHidden = false
+            }
+            scrollView.setContentOffset(CGPoint(x: scrollView.contentOffset.x - self.view.frame.width, y: 0), animated: true)
+            return
+        }
+        if gestureRecognizer.state == .began {
+            newView = Bundle.main.loadNibNamed("Slide", owner: self, options: nil)?.first as? Slide
+            slide = gestureRecognizer.view as? Slide
+            newView?.label.text = slide!.label.text
+            newView?.address.text = slide!.address.text
+            newView?.frame = CGRect(x: 12, y: (view.frame.height / 3) * 2, width: view.frame.width - 24, height: view.frame.height)
+            view.addSubview(newView!)
+            slide!.isHidden = true
+        } else if gestureRecognizer.state == .changed && newView != nil{
+            let translation = gestureRecognizer.translation(in: self.view)
+            if newView!.center.y + translation.y >= view.center.y {
+                newView!.center = CGPoint(x: newView!.center.x, y: newView!.center.y + translation.y)
+                gestureRecognizer.setTranslation(CGPoint(x: 0,y: 0), in: self.view)
+            }
+        } else if gestureRecognizer.state == .ended && newView != nil{
+            UIView.animate(withDuration: 0.8, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: .curveEaseInOut, animations: {
+                self.newView!.frame.origin.y = self.scrollView.frame.origin.y
+            }) { (_) in
+                self.newView?.removeFromSuperview()
+                self.newView = nil
+                self.slide!.isHidden = false
+            }
+        }
+       
     }
     
     func setPoints() {
@@ -75,25 +127,21 @@ class ViewController: UIViewController {
         let coordinateRegion = MKCoordinateRegion(center: location.coordinate, latitudinalMeters: regionRadius, longitudinalMeters: regionRadius)
         map.setRegion(coordinateRegion, animated: true)
     }
+    
 }
 
 extension ViewController: UIScrollViewDelegate {
-    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        print("========================")
         let pageIndex = round(scrollView.contentOffset.x/view.frame.width)
-        print(venues[Int(pageIndex)])
         centerOnLocation(location:  CLLocation(latitude: venues[Int(pageIndex)]["location"]["lat"].double!, longitude: venues[Int(pageIndex)]["location"]["lng"].double!)  )
     }
-    
 }
 
 extension ViewController: MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         if points.contains(view.annotation as! MKPointAnnotation) {
             let index = points.firstIndex(of: view.annotation as! MKPointAnnotation)
-            scrollView.setContentOffset(CGPoint(x: view.frame.width * CGFloat(index), y: 0), animated: true)
-            print(index!)
+            scrollView.setContentOffset(CGPoint(x: self.view.frame.width * CGFloat(index!), y: 0), animated: true)
         }
     }
 }
