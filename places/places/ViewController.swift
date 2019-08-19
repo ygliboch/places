@@ -84,9 +84,6 @@ class ViewController: UIViewController {
             slide = gestureRecognizer.view as? Slide
             newView?.label.text = slide!.label.text
             newView?.address.text = slide!.address.text
-            if slide!.photo.image != nil {
-                newView?.photo.image = slide!.photo.image
-            }
             newView?.frame = CGRect(x: 12, y: (view.frame.height / 3) * 2, width: view.frame.width - 24, height: view.frame.height)
             view.addSubview(newView!)
             slide!.isHidden = true
