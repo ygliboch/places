@@ -45,9 +45,7 @@ class ViewController: UIViewController {
             let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handle))
             slide.isUserInteractionEnabled = true
             slide.gestureRecognizers = [panGesture]
-            requestManager.venueInfo(id: venue["id"].string!) { (response) in
-                print(response)
-            }
+            
             slides.append(slide)
         }
     }
@@ -64,7 +62,6 @@ class ViewController: UIViewController {
     }
     
     @objc func handle(gestureRecognizer: UIPanGestureRecognizer) {
-        print(gestureRecognizer.velocity(in: gestureRecognizer.view).x, gestureRecognizer.velocity(in: gestureRecognizer.view).x)
         if gestureRecognizer.velocity(in: gestureRecognizer.view).x < -1500.0 && gestureRecognizer.velocity(in: gestureRecognizer.view).x < -1500.0 && scrollView.contentOffset.x + self.view.frame.width <= scrollView.contentSize.width{
             scrollView.setContentOffset(CGPoint(x: scrollView.contentOffset.x + self.view.frame.width, y: 0), animated: true)
             if newView != nil {
@@ -87,6 +84,9 @@ class ViewController: UIViewController {
             slide = gestureRecognizer.view as? Slide
             newView?.label.text = slide!.label.text
             newView?.address.text = slide!.address.text
+            if slide!.photo.image != nil {
+                newView?.photo.image = slide!.photo.image
+            }
             newView?.frame = CGRect(x: 12, y: (view.frame.height / 3) * 2, width: view.frame.width - 24, height: view.frame.height)
             view.addSubview(newView!)
             slide!.isHidden = true

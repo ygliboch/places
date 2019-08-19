@@ -13,5 +13,7 @@ class Slide: UIView {
 
     @IBOutlet weak var address: UILabel!
     @IBOutlet weak var label: UILabel!
+    @IBOutlet weak var timeFrames: UILabel!
+    @IBOutlet weak var photo: UIImageView!
     
 }
